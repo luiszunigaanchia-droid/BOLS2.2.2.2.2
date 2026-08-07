@@ -1,0 +1,47 @@
+{
+  "name": "bandas-app",
+  "version": "1.0.0",
+  "description": "Bitácora de Bandas Oligoclonales - Hematología",
+  "main": "main.js",
+  "author": "Laboratorio Clínico - Hematología",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac"
+  },
+  "devDependencies": {},
+  "build": {
+    "appId": "com.hematologia.bandas",
+    "productName": "Bandas Oligoclonales",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "build/icon.icns",
+      "category": "public.app-category.healthcare-fitness"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Bandas Oligoclonales - Hematología",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico"
+    }
+  }
+}
