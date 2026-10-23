@@ -1752,6 +1752,10 @@ function exportJSON() {
   showToast('Datos exportados exitosamente', 'success');
 }
 
+function runDedupKey(run) {
+  return JSON.stringify([run.date, (run.samples || []).length, run.obs]);
+}
+
 function importJSON() {
   const input = document.createElement('input');
   input.type = 'file';
@@ -1769,16 +1773,13 @@ function importJSON() {
         if (runsList) {
           if (confirm(`¿Desea importar ${runsList.length} corrida(s)? Esto se integrará con los datos existentes sin borrarlos.`)) {
             const processedRuns = [];
+            const existingRunKeys = new Set(db.runs.map(runDedupKey));
             let duplicatesSkipped = 0;
             
             runsList.forEach(run => {
               if (!run || typeof run !== 'object') return;
-              const isDuplicate = db.runs.some(existing => 
-                existing.date === run.date && 
-                (existing.samples || []).length === (run.samples || []).length &&
-                existing.obs === run.obs
-              );
-              if (isDuplicate) {
+              const runKey = runDedupKey(run);
+              if (existingRunKeys.has(runKey)) {
                 duplicatesSkipped++;
                 return;
               }
@@ -1795,6 +1796,7 @@ function importJSON() {
                 interp: String(sample.interp || 'T1'),
                 notas: String(sample.notas || '')
               }));
+              existingRunKeys.add(runKey);
               processedRuns.push({
                 id: newRunId,
                 date: String(run.date || getLocalDateString()),
