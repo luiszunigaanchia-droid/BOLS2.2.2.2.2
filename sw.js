@@ -1,7 +1,8 @@
 'use strict';
 
 const CACHE_PREFIX = 'bandas-oligoclonales-';
-const CACHE_NAME = `${CACHE_PREFIX}v2`;
+const CACHE_NAME = `${CACHE_PREFIX}v3`;
+const SCOPE_PATH = new URL(self.registration.scope).pathname;
 
 const APP_SHELL = [
   './',
@@ -44,24 +45,23 @@ self.addEventListener('fetch', (event) => {
   }
 
   const url = new URL(event.request.url);
-  if (url.origin !== self.location.origin) {
+  if (url.origin !== self.location.origin || !url.pathname.startsWith(SCOPE_PATH)) {
     return;
   }
 
   if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put('./index.html', copy);
-          });
-          return response;
-        })
-        .catch(() => {
-          return caches.match('./index.html');
-        })
-    );
+    event.respondWith((async () => {
+      try {
+        const response = await fetch(event.request);
+        if (response.ok && response.type === 'basic') {
+          const update = caches.open(CACHE_NAME).then((cache) => cache.put('./index.html', response.clone()));
+          event.waitUntil(update);
+        }
+        return response;
+      } catch (_) {
+        return (await caches.match('./index.html')) || Response.error();
+      }
+    })());
     return;
   }
 
