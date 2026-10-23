@@ -8,7 +8,9 @@ const path = require('node:path');
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 const match = html.match(/function runDedupKey\(run\) \{[\s\S]*?\n\}/);
 assert.ok(match, 'runDedupKey should exist');
-const key = vm.runInNewContext(`(${match[0]}; runDedupKey)`.replace('(function', 'function').replace('; runDedupKey)', ')'), {});
+const context = vm.createContext({ JSON });
+vm.runInContext(match[0], context);
+const key = context.runDedupKey;
 // The same comparison is used for existing and imported runs.
 test('duplicate signature matches date, sample count and observations', () => {
   const existing = { date: '2026-10-23', samples: [{}, {}], obs: 'observación' };
